@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",                          // 目标为最新的 ECMAScript 标准
+    "module": "ESNext",                          // 使用 ES 模块
+    "moduleResolution": "Node",                 // 模块解析策略
+    "strict": true,                             // 启用所有严格类型检查选项
+    "esModuleInterop": true,                    // 允许与 CommonJS 模块互操作
+    "forceConsistentCasingInFileNames": true,   // 文件名大小写一致性检查
+    "skipLibCheck": true,                       // 跳过库文件的类型检查
+    "baseUrl": "./",                            // 设置路径的基准目录
+    "paths": {                                  // 配置路径别名
+      "@/*": ["src/*"]
+    },
+    "outDir": "./dist",                         // 输出目录
+    "rootDir": "./src",                         // 源文件目录
+    "allowSyntheticDefaultImports": true,      // 允许默认导入非 ES 模块
+    "resolveJsonModule": true,                 // 支持导入 JSON 文件
+    "isolatedModules": true,                   // 每个文件作为单独模块
+    "noImplicitAny": true,                     // 禁止隐式的 `any` 类型
+    "noUnusedLocals": true,                    // 检查未使用的局部变量
+    "noUnusedParameters": true,                // 检查未使用的函数参数
+    "noFallthroughCasesInSwitch": true,        // 禁止 switch 语句中的 fallthrough
+    "useDefineForClassFields": true            // 使用 `define` 初始化类字段
+  },
+  "include": ["src"],                          // 包含的文件
+  "exclude": ["node_modules", "dist"]          // 排除的文件
+}
