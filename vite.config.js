@@ -10,8 +10,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: './src/main.js',
-      name: 'RightToolbarPlugin',
-      fileName: (format) => `right-toolbar-plugin.${format}.js`,
+      name: 'ToolbarPlugin',
+      fileName: (format) => `toolbar-plugin.${format}.js`,
     },
     rollupOptions: {
       // 确保将插件作为独立模块
@@ -21,4 +21,5 @@ export default defineConfig({
       },
     },
   },
+  sourceMap: true,
 });

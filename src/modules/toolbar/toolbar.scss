@@ -1,0 +1,40 @@
+#toolbar.dark {
+  --toolbar-bg-color: #1f1f1f;
+  --toolbar-bg-color-hover: #00C0C0;
+  --toolbar-text-color: #666;
+}
+
+#toolbar.light {
+  --toolbar-bg-color: #fff;
+  --toolbar-bg-color-hover: #00C0C0;
+  --toolbar-text-color: #999;
+}
+
+
+#toolbar {
+  position: fixed;
+  right: 0;
+  bottom: 82px;
+  width: 36px;
+  z-index: 999;
+  color: var(--toolbar-text-color);
+  background-color: var(--toolbar-bg-color);
+  border-radius: 4px 0 0 4px;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .18);
+  text-align: center;
+  .toolbar-item {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    width: 36px;    
+    transform: translateZ(0);
+    cursor: pointer;
+    &:hover {
+      color: #fff;
+      background-color: var(--toolbar-bg-color-hover);
+    }
+  }
+
+}

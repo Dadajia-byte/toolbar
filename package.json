@@ -1,5 +1,10 @@
 {
+  "name": "toolbar-plugin",
   "description": "toolbar",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
   "devDependencies": {
     "sass": "^1.86.0",
     "typescript": "^5.8.2",

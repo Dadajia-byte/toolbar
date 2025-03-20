@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script type="module">
+    import { Toolbar } from './src/main.ts';
+    const toolbar = new Toolbar({
+      customModules: [
+        { 
+          name: 'test', 
+          render: ()=>({
+            tag: 'div',
+            props: {
+              class: 'toolbar-item'
+            },
+            children: ['1']
+          })  
+        },
+        { 
+          name: 'test1', 
+          render: ()=>({
+            tag: 'div',
+            props: {
+              class: 'toolbar-item'
+            },
+            children: ['2']
+          })  
+        },
+        {
+          name: 'swtich',
+          render: ()=>({
+            tag: 'div',
+            props: {
+              onClick: ()=>{
+                console.log(123);
+                Toolbar.switchTheme();
+              },
+              class: 'toolbar-item'
+            },
+            children: ['切换']
+          })
+        }
+      ]
+    });
+    toolbar.init();
+  </script>
+</body>
+</html>
