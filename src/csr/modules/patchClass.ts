@@ -1,4 +1,4 @@
-export default function patchClass(el, value) {
+export default function patchClass(el:HTMLElement, value:string | null) {
   if (value == null) {
     // 移除class
     el.removeAttribute("class");

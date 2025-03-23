@@ -37,6 +37,7 @@ export function createRenderer(options: RenderOptions) {
   }
 
   function patch(oldVNode: VNode | null, newVNode: VNode, container: any) {
+    debugger;
     if (oldVNode === newVNode) return;
     if (oldVNode && (oldVNode?.tag !== newVNode.tag)) {
       unmount(oldVNode);
@@ -145,10 +146,15 @@ export function createRenderer(options: RenderOptions) {
       n2.el = textNode;
       insert(textNode, container);
     } else {
-      const el = (n2.el = n1.el);
-      if (n1.children !== n2.children) {
-        setText(el, n2.children as string);
+      if (!n1.el) {
+        setText(container, n2)
+      } else {  
+        const el = (n2.el = n1.el);
+        if (n1.children !== n2.children) {
+          setText(el, n2.children as string);
+        }
       }
+      
     }
   }
 

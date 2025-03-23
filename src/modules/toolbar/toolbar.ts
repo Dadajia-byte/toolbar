@@ -7,18 +7,32 @@ export type Module = {
 };
 
 export interface ToolbarOptions {
+  theme?: "dark" | "light"; // 主题，默认 dark
   defaultModules?: string[]; // 默认渲染的模块名称
   customModules?: Module[];  // 自定义模块
+  container?: HTMLElement; // 渲染的容器 默认 document.body
 }
 
 export class Toolbar {
   private defaultModules: Record<string, Module>;
   private activeModules: Module[];
+  private theme: "dark" | "light"; // 主题，默认 dark
+  private toolbarVNode: VNode; // 工具箱的 VNode
+  private container: HTMLElement; // 渲染的容器 默认 document.body
 
   constructor(options: ToolbarOptions = {}) {
-    this.defaultModules = {};
+    this.theme = options.theme || "dark";
+    this.container = options.container || document.body; // 默认容器
+    this.toolbarVNode = {
+      tag: "div",
+      props: {
+        id: "toolbar",
+        class: this.theme,
+      },
+      children: [],
+    }
     this.activeModules = [];
-
+    this.defaultModules = {}
     // 加载默认模块
     if (options.defaultModules) {
       options.defaultModules.forEach((moduleName) => {
@@ -28,32 +42,52 @@ export class Toolbar {
         }
       });
     }
-
     // 加载自定义模块
     if (options.customModules) {
       this.activeModules.push(...options.customModules);
     }
-  }
-  private update(): void {
-    const newVNode: VNode = {
+    // 初始化工具栏的 VNode
+    this.toolbarVNode = {
       tag: "div",
       props: {
         id: "toolbar",
-        class: "dark",
+        class: this.theme,
       },
       children: this.activeModules.map((module) => module.render()),
     };
-    render(newVNode, document.body);
+    
+  }
+  private update(): void {
+    this.toolbarVNode = {
+      ...this.toolbarVNode,
+      props: {
+        ...this.toolbarVNode.props,
+        class: this.theme,
+      },
+      children: this.activeModules.map((module) => {
+        const vnode = module.render();
+        return { ...vnode };
+      }),
+    };
+    console.log("toolbarVNode", this.toolbarVNode.children);
+    
+    render(this.toolbarVNode, this.container);
   }
 
-  // 调整模块顺序
   reorderModules(order: string[]) {
     const moduleMap = new Map(this.activeModules.map((module) => [module.name, module]));
     const orderModules = order.map((name) => moduleMap.get(name)).filter(Boolean) as Module[];
-    // 未指定顺序的模块，保持原有顺序
     const remainingModules = this.activeModules.filter((module) => !order.includes(module.name));
-    // 未指定顺序的模块，始终放在最后
     this.activeModules = [...orderModules, ...remainingModules];
+    this.update();
+  }
+
+  switchTheme(theme?: "dark" | "light") {
+    if (theme) {
+      this.theme = theme;
+    } else {
+      this.theme = this.theme === "dark" ? "light" : "dark";
+    }
     this.update();
   }
 
@@ -62,27 +96,10 @@ export class Toolbar {
     this.activeModules.push(module);
     this.update();
   }
-
-  // 内部切换主题
-  static switchTheme(theme?: "dark" | "light") {
-    const toolbar = document.getElementById("toolbar");
-    if (!toolbar) {
-      return;
-    }
-    if (!theme) { // 如果没有传入主题，则根据当前主题进行切换
-      if (toolbar.classList.contains("dark")) {
-        toolbar.classList.remove("dark");
-        toolbar.classList.add("light");
-      } else if (toolbar.classList.contains("light")) {
-        toolbar.classList.remove("light");
-        toolbar.classList.add("dark");
-      } else {
-        toolbar.classList.add("dark");
-      }
-    } else {
-      toolbar.classList.remove("dark", "light");
-      toolbar.classList.add(theme);
-    }
+  // 动态删除模块
+  removeModule(moduleName: string) {
+    this.activeModules = this.activeModules.filter((module) => module.name !== moduleName);
+    this.update();
   }
 
   // 初始化渲染工具箱

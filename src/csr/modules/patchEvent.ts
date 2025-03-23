@@ -1,9 +1,9 @@
-function createInvoker(fn) {
-  const invoker = (e) => invoker.value(e);
+function createInvoker(fn: (e: Event) => void) {
+  const invoker = (e: Event) => invoker.value(e);
   invoker.value = fn; // 更改invoker中的fn，而不是重新解绑事件再重新绑定新事件
   return invoker;
 }
-export default function patchEvent(el, name, nextValue) {
+export default function patchEvent(el: any, name: string, nextValue: (e:Event)=>void | null) {
   // vue_event_invoker
   const invokers = el._vei || (el._vei = {});
   const eventName = name.slice(2).toLowerCase();

@@ -6,7 +6,8 @@
   <title>Document</title>
 </head>
 <body>
-  <button id="btnTest">测试</button>
+  <button id="btnAdd">测试增加</button>
+  <button id="btnRemove">测试删除</button>
   <script type="module">
     import { Toolbar } from './src/main.ts';
     const toolbar = new Toolbar({
@@ -38,7 +39,7 @@
             props: {
               onClick: ()=>{
                 console.log(123);
-                Toolbar.switchTheme();
+                toolbar.switchTheme()
               },
               class: 'toolbar-item'
             },
@@ -49,8 +50,12 @@
     });
     toolbar.reorderModules(['test1', 'swtich']);
     toolbar.init();
-    const btnTest = document.getElementById('btnTest');
-    btnTest.addEventListener('click', () => {
+    const btnAdd = document.getElementById('btnAdd');
+    const btnRemove = document.getElementById('btnRemove');
+    btnRemove.addEventListener('click', () => {
+      toolbar.removeModule('test1');
+    });
+    btnAdd.addEventListener('click', () => {
       toolbar.addModule({
         name: 'test2',
         render: () => ({
@@ -61,7 +66,6 @@
           children: ['3']
         })
       });
-      console.log(toolbar);
       
     });
   </script>
