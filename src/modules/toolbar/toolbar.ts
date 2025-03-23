@@ -24,7 +24,7 @@ export class Toolbar {
       options.defaultModules.forEach((moduleName) => {
         const module = this.defaultModules[moduleName];
         if (module) {
-          this.addModule(module);
+          this.activeModules.push(module);
         }
       });
     }
@@ -34,10 +34,33 @@ export class Toolbar {
       this.activeModules.push(...options.customModules);
     }
   }
+  private update(): void {
+    const newVNode: VNode = {
+      tag: "div",
+      props: {
+        id: "toolbar",
+        class: "dark",
+      },
+      children: this.activeModules.map((module) => module.render()),
+    };
+    render(newVNode, document.body);
+  }
+
+  // 调整模块顺序
+  reorderModules(order: string[]) {
+    const moduleMap = new Map(this.activeModules.map((module) => [module.name, module]));
+    const orderModules = order.map((name) => moduleMap.get(name)).filter(Boolean) as Module[];
+    // 未指定顺序的模块，保持原有顺序
+    const remainingModules = this.activeModules.filter((module) => !order.includes(module.name));
+    // 未指定顺序的模块，始终放在最后
+    this.activeModules = [...orderModules, ...remainingModules];
+    this.update();
+  }
 
   // 动态添加模块
   addModule(module: Module) {
     this.activeModules.push(module);
+    this.update();
   }
 
   // 内部切换主题
@@ -64,15 +87,7 @@ export class Toolbar {
 
   // 初始化渲染工具箱
   init(): void {
-    const toolbarVNode:VNode = {
-      tag: 'div',
-      props: {
-        id: 'toolbar',
-        class: 'dark',
-      },
-      children: this.activeModules.map((module) => module.render())
-    }
-    render(toolbarVNode, document.body);
+    this.update();
   }
   
 }

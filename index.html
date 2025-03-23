@@ -6,6 +6,7 @@
   <title>Document</title>
 </head>
 <body>
+  <button id="btnTest">测试</button>
   <script type="module">
     import { Toolbar } from './src/main.ts';
     const toolbar = new Toolbar({
@@ -46,7 +47,23 @@
         }
       ]
     });
+    toolbar.reorderModules(['test1', 'swtich']);
     toolbar.init();
+    const btnTest = document.getElementById('btnTest');
+    btnTest.addEventListener('click', () => {
+      toolbar.addModule({
+        name: 'test2',
+        render: () => ({
+          tag: 'div',
+          props: {
+            class: 'toolbar-item'
+          },
+          children: ['3']
+        })
+      });
+      console.log(toolbar);
+      
+    });
   </script>
 </body>
 </html>
