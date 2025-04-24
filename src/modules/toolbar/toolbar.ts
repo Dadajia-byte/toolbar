@@ -24,7 +24,7 @@ export class Toolbar {
     this.theme = options.theme || "dark";
     this.container = options.container || document.body; // 默认容器
     this.toolbarVNode = {
-      tag: "div",
+      type: "div",
       props: {
         id: "toolbar",
         class: this.theme,
@@ -48,7 +48,7 @@ export class Toolbar {
     }
     // 初始化工具栏的 VNode
     this.toolbarVNode = {
-      tag: "div",
+      type: "div",
       props: {
         id: "toolbar",
         class: this.theme,

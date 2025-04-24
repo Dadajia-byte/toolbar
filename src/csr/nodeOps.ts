@@ -2,8 +2,8 @@
 
 export const nodeOps = {
   // 创建元素
-  createElement(tag: string): HTMLElement {
-    return document.createElement(tag);
+  createElement(type: string): HTMLElement {
+    return document.createElement(type);
   },
   // 创建文本节点
   createText(text: string): Text {

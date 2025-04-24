@@ -1,12 +1,8 @@
-export interface VNode {
-  tag: string | undefined; // 节点类型
-  props?: Record<string, any>;
-  children?: Array<VNode | string> | string; // 子节点
-  el?: any; // 真实 DOM 元素
-}
+import { getSequence } from "./shared";
+import { VNode, createVNode, Text, ShapeFlag } from "./vnode";
 
 export interface RenderOptions {
-  createElement(tag: string): any;
+  createElement(type: string): any;
   createText(text: string): any;
   setText(node: any, text: string): void;
   setElementText(node: any, text: string): void;
@@ -17,158 +13,258 @@ export interface RenderOptions {
 
 export function createRenderer(options: RenderOptions) {
   const {
-    createElement,
-    createText,
-    insert,
-    patchProp,
-    remove,
-    setText,
+    createElement: hostCreateElement,
+    createText: hostCreateText,
+    setElementText: hostSetElementText,
+    insert: hostInsert,
+    patchProp: hostPatchProp,
+    remove: hostRemove,
+    setText: hostSetText,
   } = options;
 
+  const normalize = (children: any) =>{
+    if (Array.isArray(children)) {
+      for(let i = 0; i < children.length; i++) {
+        if (
+          typeof children[i] === "string" ||
+          typeof children[i] === "number"
+        ) {
+          children[i] = createVNode(Text, null, String(children[i]));
+        }
+      }
+    }
+    return children;
+  }
+
   function render(vnode: VNode, container: any): void {
-    const prevVNode = container._vnode || null;
-    if (vnode) {
-      patch(prevVNode, vnode, container);
-    } else if (prevVNode) {
-      // 如果新 vnode 为空且存在旧 vnode，则移除旧节点
-      unmount(prevVNode);
-    }
-    container._vnode = vnode; // 缓存当前 vnode
-  }
-
-  function patch(oldVNode: VNode | null, newVNode: VNode, container: any) {
-    debugger;
-    if (oldVNode === newVNode) return;
-    if (oldVNode && (oldVNode?.tag !== newVNode.tag)) {
-      unmount(oldVNode);
-      oldVNode =null;
-    }
-    if (newVNode.tag === undefined) { // 文本节点
-      processText(oldVNode, newVNode, container);
+    if (vnode === null) {
+      if (container._vnode) {
+        unmount(container._vnode);
+      }
     } else {
-      processElement(oldVNode, newVNode, container);
-    }
-  }
-  function mountElement(vnode: VNode, container: any) {
-    let el = (vnode.el = createElement(vnode.tag as string));
-    if (vnode.props) {
-      for (const key in vnode.props) {
-        patchProp(el, key, null, vnode.props[key]);
-      }
-    }
-    if (typeof vnode.children === "string") {
-      setText(el, vnode.children);
-    } else if (Array.isArray(vnode.children)) {
-      mountChildren(vnode.children, el);
-    }
-    insert(el, container);
-  }
-  function normalize(children: Array<VNode | string>) {
-    return children.map((child) => {
-      if (typeof child === "string" || typeof child === "number") {
-        return {
-          tag: undefined,
-          props: {},
-          children: child.toString(),
-        } as VNode;
-      }
-      return child;
-    });
-  }
-  function mountChildren(children:Array<VNode |string>, container: any) {
-    const normalizedChildren = normalize(children);
-    for (const child of normalizedChildren) {
-      patch(null, child as VNode, container);
+      patch(container?._vnode || null, vnode, container);
+      container._vnode = vnode; // 缓存当前 vnode
     }
   }
 
-  function patchElement(n1:VNode,n2:VNode) {
+  function patch(n1: VNode | null, n2: VNode, container: any, anchor: any = null) {
+    if (n1 === n2) {
+      return; // 两次渲染一个节点
+    }
+    if (n1 && n1.type !== n2.type) { // 这里就不对key做处理了
+      unmount(n1);
+      n1 = null;
+    }
+    const { type, shapeFlag } = n2;
+    switch (type) {
+      case Text:
+        processText(n1, n2, container);
+        break;
+      default:
+        if (shapeFlag & ShapeFlag.ELEMENT) {
+          processElement(n1, n2, container, anchor);
+        }
+    }
+  }
+  function mountElement(vnode: VNode, container: any, anchor: any) {
+    const { type, children, props, shapeFlag } = vnode;
+    // -- 1.创建真实 DOM --
+    let el = (vnode.el = hostCreateElement(type));
+    // -- 2.处理属性 --
+    if (props) {
+      for (const key in props) {
+        hostPatchProp(el, key, null, props[key]);
+      }
+    }
+    // -- 3. 处理子元素 --
+    if (shapeFlag & ShapeFlag.TEXT_CHILDREN) {
+      hostSetElementText(el, children);
+    } else if (shapeFlag & ShapeFlag.ARRAY_CHILDREN) {
+      mountChildren(children, el, anchor);
+    }
+
+    // -- tranistion处理(extra) --
+
+    // -- 4. 挂载到容器 --
+    hostInsert(el, container);
+  }
+
+  function patchElement(n1:VNode, n2:VNode, anchor: any=null) {
+    // -- 1.复用dom --
     let el = (n2.el = n1.el);
     let oldProps = n1.props || {};
     let newProps = n2.props || {};
+    // -- 2.处理属性 --
     patchProps(el, oldProps, newProps);
-    patchChildren(n1.children, n2.children, el);
+    // -- 3.全量diff --
+    patchChildren(n1, n2, el, anchor);
+  }
+
+  function patchChildren(n1: VNode, n2: VNode, el: any, anchor: any = null) {
+    const c1 = n1.children;
+    const c2 = normalize(n2.children);
+    const prevShapeFlag = n1.shapeFlag;
+    const shapeFlag = n2.shapeFlag;
+    if (shapeFlag & ShapeFlag.TEXT_CHILDREN) {
+      if (prevShapeFlag & ShapeFlag.ARRAY_CHILDREN) {
+        unmountChildren(c1);
+      }
+      if (c1 !== c2) {
+        hostSetElementText(el, c2);
+      }
+    } else {
+      if (prevShapeFlag & ShapeFlag.ARRAY_CHILDREN) {
+        if (shapeFlag & ShapeFlag.ARRAY_CHILDREN) {
+          patchKeyedChildren(c1, c2, el);
+        } else {
+          unmountChildren(c1);
+        } 
+      } else {
+        if (prevShapeFlag & ShapeFlag.TEXT_CHILDREN) {
+          hostSetElementText(el, "");
+        }
+        if (shapeFlag & ShapeFlag.ARRAY_CHILDREN) {
+          mountChildren(c2, el, anchor);
+        }
+      }
+    }
+  }
+
+  function patchKeyedChildren(c1: any, c2: any, el: any) {
+    let i= 0;
+    let e1 = c1.length - 1;
+    let e2 = c2.length - 1;
+    while (i <= e1 && i <= e2) {
+      const n1 = c1[i];
+      const n2 = c2[i];
+      if (n1.type === n2.type) {
+        patch(n1, n2, el);
+      } else {
+        break;
+      }
+      i++;
+    }
+    while (i <= e1 && i <= e2) {
+      const n1 = c1[e1];
+      const n2 = c2[e2];
+      if (n1.type === n2.type) {
+        patch(n1, n2, el);
+      } else {
+        break;
+      }
+      e1--;
+      e2--;
+    }
+    if (i>e1) {
+      if (i<=e2) {
+        let nextPos = e2 + 1;
+        let anchor = c2[nextPos]?.el;
+        while(i<=e2) {
+          patch(null, c2[i], el, anchor);
+          i++;
+        }
+      }
+    } else if (i> e2) {
+      if (i<= e1) {
+        while(i<=e1) {
+          unmount(c1[i]);
+          i++;
+        }
+      }
+    } else {
+      let s1 = i;
+      let s2 = i;
+      const keyToNewIndexMap = new Map();
+      let toBePatched = e2 - s2 + 1;
+      let newIndexToOldMapIndex = new Array(toBePatched).fill(0);
+      for (let i = s2; i <= e2; i++) {
+        const child = c2[i];
+        keyToNewIndexMap.set(child.key, i);
+      }
+      for (let i = s1; i <= e1; i++) {
+        const vnode = c1[i];
+        let newIndex = keyToNewIndexMap.get(vnode.key);
+        if (newIndex === undefined) {
+          unmount(vnode);
+        } else {
+          newIndexToOldMapIndex[newIndex - s2] = i + 1;
+          patch(vnode, c2[newIndex] as VNode, el);
+        }
+      }
+
+      // 调整顺序倒序插入
+      let increasingSeq = getSequence(newIndexToOldMapIndex);
+      let j = increasingSeq.length;
+      for(let i = toBePatched; i>0; i--) {
+        let newIndex = s2 + i;
+        let anchor = c2[newIndex +1]?.el;
+        const vnode = c2[newIndex];
+        if (!c2[newIndex].el) {
+          patch(null, vnode, el, anchor);
+        } else {
+          if (i===increasingSeq[j]) {
+            j--;
+          } else {
+            hostInsert(vnode.el, el, anchor);
+          }
+        }
+      }
+    }
+  }
+
+  function mountChildren(children:Array<VNode |string>, container: any, anchor: any = null) {
+    normalize(children);
+    if (Array.isArray(children)) {
+      for (let i = 0; i < children.length; i++) {
+        patch(null, children[i] as VNode, container, anchor);
+      }
+    } else {
+      patch(null, children, container, anchor);
+    }
+  }
+  function unmountChildren(children: Array<VNode | string>) {
+    for (let i = 0; i < children.length; i++) {
+      let child = children[i];
+      unmount(child as VNode);
+    }
+  }
+
+  function processElement(n1: VNode | null, n2: VNode, container: any, anchor: any = null) {
+    if (n1 === null) {
+      mountElement(n2, container, anchor);
+    } else {
+      patchElement(n1, n2, anchor);
+    }
   }
 
   function patchProps(el: any, oldProps: Record<string, any>, newProps: Record<string, any>) {
     for (const key in newProps) {
-      patchProp(el, key, oldProps[key], newProps[key]);
+      hostPatchProp(el, key, oldProps[key], newProps[key]);
     }
     for (const key in oldProps) {
       if (!(key in newProps)) {
-        patchProp(el, key, oldProps[key], null);
+        hostPatchProp(el, key, oldProps[key], null);
       }
     }
   }
 
-  function patchChildren(oldChildren: any, newChildren: any, container: any) {
-    if (typeof newChildren === "string") {
-      if (Array.isArray(oldChildren)) {
-        oldChildren.forEach((child: VNode) => unmount(child));
-      }
-      setText(container, newChildren);
-    } else if (Array.isArray(newChildren)) {
-      if (typeof oldChildren === "string") {
-        setText(container, "");
-        mountChildren(newChildren, container);
-      } else if (Array.isArray(oldChildren)) {
-        const oldLen = oldChildren.length;
-        const newLen = newChildren.length;
-        const commonLength = Math.min(oldLen, newLen);
-        for (let i = 0; i < commonLength; i++) {
-          patch(oldChildren[i], newChildren[i], container);
-        }
-        if (newLen > oldLen) {
-          for (let i = commonLength; i < newLen; i++) {
-            patch(null, newChildren[i], container);
-          }
-        } else if (oldLen > newLen) {
-          for (let i = commonLength; i < oldLen; i++) {
-            unmount(oldChildren[i]);
-          }
-        }
-      }
-    }
-  }
-
-
-  function processElement(n1: VNode | null, n2: VNode, container: any) {
-    if (n1 === null) {
-      mountElement(n2, container);
-    } else {
-      patchElement(n1, n2);
-    }
-  }
-  
   function processText(n1: VNode | null, n2: VNode, container: any) {
     if (n1 === null) {
-      const textNode = createText(n2.children as string);
-      n2.el = textNode;
-      insert(textNode, container);
+      hostInsert((n2.el = hostCreateText(n2.children as string)), container);
     } else {
-      if (!n1.el) {
-        setText(container, n2)
-      } else {  
-        const el = (n2.el = n1.el);
-        if (n1.children !== n2.children) {
-          setText(el, n2.children as string);
-        }
+      if (n1.children !== n2.children) {
+        hostSetText((n2.el = n1.el), n2.children as string);
       }
-      
     }
   }
 
   function unmount(vnode: VNode) {
-    if (vnode.el) {
-      remove(vnode.el);
+    const { el } = vnode;
+    const performRemove = () => {
+      hostRemove(el);
     }
-    if (Array.isArray(vnode.children)) {
-      vnode.children.forEach((child) => {
-        if (typeof child !== "string") {
-          unmount(child as VNode);
-        }
-      });
-    }
+    // 这里暂时不考虑乱七八糟的组件和内置组件
+    performRemove();
   }
 
 

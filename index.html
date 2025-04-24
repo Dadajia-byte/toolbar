@@ -15,7 +15,7 @@
         { 
           name: 'test', 
           render: ()=>({
-            tag: 'div',
+            type: 'div',
             props: {
               class: 'toolbar-item'
             },
@@ -25,7 +25,7 @@
         { 
           name: 'test1', 
           render: ()=>({
-            tag: 'div',
+            type: 'div',
             props: {
               class: 'toolbar-item'
             },
@@ -35,7 +35,7 @@
         {
           name: 'swtich',
           render: ()=>({
-            tag: 'div',
+            type: 'div',
             props: {
               onClick: ()=>{
                 console.log(123);
@@ -59,7 +59,7 @@
       toolbar.addModule({
         name: 'test2',
         render: () => ({
-          tag: 'div',
+          type: 'div',
           props: {
             class: 'toolbar-item'
           },
