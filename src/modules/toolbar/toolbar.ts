@@ -1,9 +1,10 @@
 import { createVNode, VNode } from "@/core";
 import { BaseModule } from '../base/BaseModule';
 import "./toolbar.scss";
+import { injector } from "./default";
 interface ToolbarOptions {
   theme?: "dark" | "light";
-  defaultModules?: string[];
+  defaultModules?: Array<string | {name: string; options?: any}>;
   customModules?: BaseModule[];
   container?: HTMLElement;
 }
@@ -13,13 +14,25 @@ export class Toolbar extends BaseModule {
   readonly name = "toolbar";
   private activeModules: BaseModule[] = [];
   private theme: "dark" | "light"; // 主题，默认 dark
+
   constructor(options: ToolbarOptions) {
     super();
     this.theme = options.theme || "dark";
-    if (options.customModules) {
-      this.activeModules.push(...options.customModules);
-    }
+    const defaultModules = this.resolveDefaultModules(options.defaultModules || []);
+    const customModules = options.customModules || [];
+    this.activeModules = [...defaultModules, ...customModules];
   }
+
+  private resolveDefaultModules(defaultModules: Array<string | { name: string; options?: any }>): BaseModule[] {
+    return defaultModules.map((module) => {
+      if (typeof module === "string") {
+        return injector.resolve(module);
+      } else {
+        return injector.resolve(module.name, module.options);
+      }
+    });
+  }
+
   render(): VNode {
     return createVNode("div", { id: "toolbar", class: this.theme }, this.activeModules.map((module) => module.render()));
   }
