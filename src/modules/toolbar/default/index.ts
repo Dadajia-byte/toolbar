@@ -1,7 +1,7 @@
 import { BaseModule } from "../../base/BaseModule";
+import { Top } from "./top";
 
 type ModuleFactory = (options?: any) => BaseModule;
-
 class Injector {
   private registry = new Map<string, ModuleFactory>();
 
@@ -22,3 +22,5 @@ class Injector {
 
 // 导出全局单例
 export const injector = new Injector();
+
+injector.register("top", (options) => new Top(options));
