@@ -6,8 +6,10 @@ export interface VNode {
   children?: any; // 子节点
   el?: any; // 真实 DOM 元素
   shapeFlag: number; // 节点类型标记位
+  key?: string | number; // 节点唯一标识
 }
 export const isVNode = (val: any): val is VNode => val?.__v_isVNode;
+export const isSameVNode = (n1: VNode, n2: VNode) => n1.type === n2.type && n1.key === n2.key;
 export function createVNode(type: any, props: any, children?: any): VNode {
   const shapeFlag = isString(type)
     ? ShapeFlag.ELEMENT
@@ -18,6 +20,7 @@ export function createVNode(type: any, props: any, children?: any): VNode {
     type,
     props,
     children,
+    key: props?.key,
     el: null,
     shapeFlag
   };

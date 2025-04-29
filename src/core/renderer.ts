@@ -1,5 +1,5 @@
 import { getSequence } from "./shared";
-import { VNode, createVNode, Text, ShapeFlag } from "./vnode";
+import { VNode, createVNode, Text, ShapeFlag, isSameVNode } from "./vnode";
 
 export interface RenderOptions {
   createElement(type: string): any;
@@ -51,7 +51,7 @@ export function createRenderer(options: RenderOptions) {
     if (n1 === n2) {
       return; // 两次渲染一个节点
     }
-    if (n1 && n1.type !== n2.type) { // 这里就不对key做处理了
+    if (n1 && isSameVNode(n1, n2)) {
       unmount(n1);
       n1 = null;
     }
@@ -137,7 +137,7 @@ export function createRenderer(options: RenderOptions) {
     while (i <= e1 && i <= e2) {
       const n1 = c1[i];
       const n2 = c2[i];
-      if (n1.type === n2.type) {
+      if (isSameVNode(n1, n2)) {
         patch(n1, n2, el);
       } else {
         break;
@@ -147,7 +147,7 @@ export function createRenderer(options: RenderOptions) {
     while (i <= e1 && i <= e2) {
       const n1 = c1[e1];
       const n2 = c2[e2];
-      if (n1.type === n2.type) {
+      if (isSameVNode(n1, n2)) {
         patch(n1, n2, el);
       } else {
         break;
