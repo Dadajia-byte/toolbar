@@ -10,45 +10,32 @@
   <button id="btnRemove">测试删除</button>
   <script type="module">
     import { Toolbar } from './src/main.ts';
+    import { createVNode } from './src/core/index'
     const toolbar = new Toolbar({
       customModules: [
         { 
           name: 'test', 
-          render: ()=>({
-            type: 'div',
-            props: {
-              class: 'toolbar-item'
-            },
-            children: ['1']
-          })  
+          render: ()=>createVNode('div', { class: 'toolbar-item' },['1'])  
         },
         { 
           name: 'test1', 
-          render: ()=>({
-            type: 'div',
-            props: {
-              class: 'toolbar-item'
-            },
-            children: ['2']
-          })  
+          render: ()=>createVNode('div', { class: 'toolbar-item' },['2'])  
         },
         {
           name: 'swtich',
-          render: ()=>({
-            type: 'div',
-            props: {
+          render: ()=>createVNode('div', 
+            {
               onClick: ()=>{
                 console.log(123);
                 toolbar.switchTheme()
               },
               class: 'toolbar-item'
             },
-            children: ['切换']
-          })
+            ['切换'])
         }
       ]
     });
-    toolbar.reorderModules(['test1', 'swtich']);
+    // toolbar.reorderModules(['test1', 'swtich']);
     toolbar.init();
     const btnAdd = document.getElementById('btnAdd');
     const btnRemove = document.getElementById('btnRemove');
@@ -58,13 +45,7 @@
     btnAdd.addEventListener('click', () => {
       toolbar.addModule({
         name: 'test2',
-        render: () => ({
-          type: 'div',
-          props: {
-            class: 'toolbar-item'
-          },
-          children: ['3']
-        })
+        render: () => createVNode('div', { class: 'toolbar-item' }, ['3'])
       });
       
     });

@@ -7,12 +7,14 @@ export interface VNode {
   el?: any; // 真实 DOM 元素
   shapeFlag: number; // 节点类型标记位
 }
+export const isVNode = (val: any): val is VNode => val?.__v_isVNode;
 export function createVNode(type: any, props: any, children?: any): VNode {
   const shapeFlag = isString(type)
     ? ShapeFlag.ELEMENT
     : 0;
 
   const vnode = {
+    __v_isVNode: true,
     type,
     props,
     children,

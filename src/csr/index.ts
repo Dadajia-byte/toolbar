@@ -1,4 +1,4 @@
-import {createRenderer,VNode} from '@/core/renderer';
+import {createRenderer, VNode} from '@/core/index';
 import { nodeOps } from './nodeOps';
 import patchProp from './patchProps';
 const renderOptions = Object.assign({patchProp}, nodeOps);
