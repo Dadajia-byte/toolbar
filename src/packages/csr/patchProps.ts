@@ -4,7 +4,6 @@ import patchStyle from "./modules/patchStyle";
 import patchEvent from "./modules/patchEvent";
 import patchAttr from "./modules/patchAttr";
 // diff
-
 export default function patchProp(el: any, key: string, prevValue: any, nextValue: any) {
   if (key === "class") {
     return patchClass(el, nextValue);

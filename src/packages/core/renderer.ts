@@ -1,6 +1,5 @@
 import { getSequence } from "./shared";
 import { VNode, createVNode, Text, ShapeFlag, isSameVNode, Fragment } from "./vnode";
-
 export interface RenderOptions {
   createElement(type: string): any;
   createText(text: string): any;
@@ -10,7 +9,6 @@ export interface RenderOptions {
   remove(child: any): void;
   patchProp(el: any, key: string, prevValue: any, nextValue: any): void;
 }
-
 export function createRenderer(options: RenderOptions) {
   const {
     createElement: hostCreateElement,
@@ -21,21 +19,17 @@ export function createRenderer(options: RenderOptions) {
     remove: hostRemove,
     setText: hostSetText,
   } = options;
-
   const normalize = (children: any) =>{
-    if (Array.isArray(children)) {
-      for(let i = 0; i < children.length; i++) {
-        if (
-          typeof children[i] === "string" ||
-          typeof children[i] === "number"
-        ) {
-          children[i] = createVNode(Text, null, String(children[i]));
-        }
+    for(let i = 0; i < children.length; i++) {
+      if (
+        typeof children[i] === "string" ||
+        typeof children[i] === "number"
+      ) {
+        children[i] = createVNode(Text, null, String(children[i]));
       }
     }
     return children;
   }
-
   function render(vnode: VNode, container: any): void {
     if (vnode === null) {
       if (container._vnode) {
@@ -46,7 +40,6 @@ export function createRenderer(options: RenderOptions) {
       container._vnode = vnode; // 缓存当前 vnode
     }
   }
-
   function patch(n1: VNode | null, n2: VNode, container: any, anchor: any = null) {
     if (n1 === n2) {
       return; // 两次渲染一个节点
@@ -66,8 +59,37 @@ export function createRenderer(options: RenderOptions) {
       default:
         if (shapeFlag & ShapeFlag.ELEMENT) {
           processElement(n1, n2, container, anchor);
+        } else if (shapeFlag & ShapeFlag.COMPONENT) {
+          processComponent(n1, n2, container, anchor);
         }
     }
+  }
+  function processComponent(n1: VNode | null, n2: VNode, container: any, anchor: any) {
+    if (n1 === null) {
+      mountComponent(n2, container, anchor);
+    } else {
+      updateComponent(n1, n2);
+    }
+  }
+  function mountComponent(vnode: VNode, container: any, anchor: any) {
+    const instance = (vnode.component = {
+      vnode,
+      subTree: null,
+      props: vnode.props || {},
+      isMounted: false
+    });
+    const Component = vnode.type;
+    const subTree = (instance.subTree = Component(instance.props));
+    patch(null, subTree, container, anchor);
+    vnode.el = subTree.el;
+    instance.isMounted = true;
+  }
+  function updateComponent(n1: VNode, n2: VNode) {
+    const instance = (n2.component = n1.component);
+    instance.props = n2.props || {};
+    const subTree = (instance.subTree = instance.vnode!.type(instance.props));
+    patch(n1.subTree, subTree, n1.el);
+    n2.el = subTree.el;
   }
   function mountElement(vnode: VNode, container: any, anchor: any) {
     const { type, children, props, shapeFlag } = vnode;
@@ -85,13 +107,9 @@ export function createRenderer(options: RenderOptions) {
     } else if (shapeFlag & ShapeFlag.ARRAY_CHILDREN) {
       mountChildren(children, el, anchor);
     }
-
-    // -- tranistion处理(extra) --
-
     // -- 4. 挂载到容器 --
     hostInsert(el, container);
   }
-
   function patchElement(n1:VNode, n2:VNode, anchor: any=null) {
     // -- 1.复用dom --
     let el = (n2.el = n1.el);
@@ -102,7 +120,6 @@ export function createRenderer(options: RenderOptions) {
     // -- 3.全量diff --
     patchChildren(n1, n2, el, anchor);
   }
-
   function patchChildren(n1: VNode, n2: VNode, el: any, anchor: any = null) {
     const c1 = n1.children;
     const c2 = normalize(n2.children);
@@ -132,7 +149,6 @@ export function createRenderer(options: RenderOptions) {
       }
     }
   }
-
   function patchKeyedChildren(c1: any, c2: any, el: any) {
     let i= 0;
     let e1 = c1.length - 1;
@@ -214,15 +230,10 @@ export function createRenderer(options: RenderOptions) {
       }
     }
   }
-
-  function mountChildren(children:Array<VNode |string>, container: any, anchor: any = null) {
+  function mountChildren(children:Array<VNode | string>, container: any, anchor: any = null) {
     normalize(children);
-    if (Array.isArray(children)) {
-      for (let i = 0; i < children.length; i++) {
-        patch(null, children[i] as VNode, container, anchor);
-      }
-    } else {
-      patch(null, children, container, anchor);
+    for (let i = 0; i < children.length; i++) {
+      patch(null, children[i] as VNode, container, anchor);
     }
   }
   function unmountChildren(children: Array<VNode | string>) {
@@ -231,7 +242,6 @@ export function createRenderer(options: RenderOptions) {
       unmount(child as VNode);
     }
   }
-
   function processElement(n1: VNode | null, n2: VNode, container: any, anchor: any = null) {
     if (n1 === null) {
       mountElement(n2, container, anchor);
@@ -239,7 +249,6 @@ export function createRenderer(options: RenderOptions) {
       patchElement(n1, n2, anchor);
     }
   }
-
   const processFragment = (n1: VNode | null, n2: VNode, container: any, anchor: any) => {
     if (n1 === null) {
       mountChildren(n2.children, container, anchor);
@@ -247,7 +256,6 @@ export function createRenderer(options: RenderOptions) {
       patchChildren(n1, n2, container, anchor);
     }
   }; 
-
   function patchProps(el: any, oldProps: Record<string, any>, newProps: Record<string, any>) {
     for (const key in newProps) {
       hostPatchProp(el, key, oldProps[key], newProps[key]);
@@ -258,7 +266,6 @@ export function createRenderer(options: RenderOptions) {
       }
     }
   }
-
   function processText(n1: VNode | null, n2: VNode, container: any) {
     if (n1 === null) {
       hostInsert((n2.el = hostCreateText(n2.children as string)), container);
@@ -268,7 +275,6 @@ export function createRenderer(options: RenderOptions) {
       }
     }
   }
-
   function unmount(vnode: VNode) {
     const { el } = vnode;
     const performRemove = () => {
@@ -277,7 +283,5 @@ export function createRenderer(options: RenderOptions) {
     // 这里暂时不考虑乱七八糟的组件和内置组件
     performRemove();
   }
-
-
   return { render };
 }
