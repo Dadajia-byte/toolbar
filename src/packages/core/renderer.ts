@@ -1,5 +1,5 @@
 import { getSequence } from "./shared";
-import { VNode, createVNode, Text, ShapeFlag, isSameVNode } from "./vnode";
+import { VNode, createVNode, Text, ShapeFlag, isSameVNode, Fragment } from "./vnode";
 
 export interface RenderOptions {
   createElement(type: string): any;
@@ -59,6 +59,9 @@ export function createRenderer(options: RenderOptions) {
     switch (type) {
       case Text:
         processText(n1, n2, container);
+        break;
+      case Fragment:
+        processFragment(n1, n2, anchor, container);
         break;
       default:
         if (shapeFlag & ShapeFlag.ELEMENT) {
@@ -236,6 +239,14 @@ export function createRenderer(options: RenderOptions) {
       patchElement(n1, n2, anchor);
     }
   }
+
+  const processFragment = (n1: VNode | null, n2: VNode, container: any, anchor: any) => {
+    if (n1 === null) {
+      mountChildren(n2.children, container, anchor);
+    } else {
+      patchChildren(n1, n2, container, anchor);
+    }
+  }; 
 
   function patchProps(el: any, oldProps: Record<string, any>, newProps: Record<string, any>) {
     for (const key in newProps) {

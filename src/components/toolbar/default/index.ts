@@ -1,5 +1,5 @@
 import { BaseModule } from "../../base/BaseModule";
-import { Top } from "./top";
+import { Top } from "./Top";
 
 type ModuleFactory = (options?: any) => BaseModule;
 class Injector {

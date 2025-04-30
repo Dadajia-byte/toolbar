@@ -7,6 +7,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  esbuild: {
+    jsxFactory: 'createVNode', // JSX工厂函数
+    jsxFragment: 'Fragment', // JSX片段
+  },
   build: {
     lib: {
       entry: './src/main.js',

@@ -1,5 +1,5 @@
-import { createVNode, VNode } from "@/core";
-import { BaseModule } from "@/modules/base/BaseModule";
+import { createVNode, VNode } from "@/packages/core";
+import { BaseModule } from "@/components/base/BaseModule";
 
 class Download extends BaseModule {
   readonly name: string = "top";

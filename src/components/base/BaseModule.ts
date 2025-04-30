@@ -1,9 +1,10 @@
-import { VNode } from "@/core";
-import { render } from "@/csr";
+import { VNode } from "@/packages/core";
+import { render } from "@/packages/csr";
 export abstract class BaseModule {
   abstract name: string; // 模块名称
   protected props: Record<string, any> = {};
   protected state: Record<string, any> = {};
+  order?: number; // 模块的顺序，数字越小越靠前
   private boundHandlers = new WeakMap<Function, Function>();
   container: HTMLElement | null = null;
   constructor(initalProps?: Record<string, any>) {

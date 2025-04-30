@@ -1,4 +1,4 @@
-import { createVNode, VNode } from "@/core";
+import { createVNode, VNode } from "@/packages/core";
 import { BaseModule } from '../base/BaseModule';
 import "./toolbar.scss";
 import { injector } from "./default";
@@ -18,9 +18,9 @@ export class Toolbar extends BaseModule {
   constructor(options: ToolbarOptions) {
     super();
     this.theme = options.theme || "dark";
-    const defaultModules = this.resolveDefaultModules(options.defaultModules || []);
+    const defaultModules = this.resolveDefaultModules(options.defaultModules || ['top']);
     const customModules = options.customModules || [];
-    this.activeModules = [...defaultModules, ...customModules];
+    this.activeModules = [...defaultModules, ...customModules].sort((a, b)=> (a.order || 0) - (b.order || 0));
   }
 
   private resolveDefaultModules(defaultModules: Array<string | { name: string; options?: any }>): BaseModule[] {

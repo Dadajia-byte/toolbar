@@ -1,5 +1,6 @@
 import { isObject, isString } from "./shared";
 export const Text = Symbol("Text");
+export const Fragment = Symbol("Fragment");
 export interface VNode {
   type: any; // 节点类型
   props?: Record<string, any>;

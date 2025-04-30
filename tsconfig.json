@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "jsx": "preserve",
+    "jsxFactory": "createVNode",
+    "jsxFragmentFactory": "Fragment",
     "target": "ESNext",                          // 目标为最新的 ECMAScript 标准
     "module": "ESNext",                          // 使用 ES 模块
     "moduleResolution": "Node",                 // 模块解析策略
@@ -22,6 +25,6 @@
     "noFallthroughCasesInSwitch": true,        // 禁止 switch 语句中的 fallthrough
     "useDefineForClassFields": true            // 使用 `define` 初始化类字段
   },
-  "include": ["src"],                          // 包含的文件
+  "include": ["src", "src/tsx.d.ts"],                          // 包含的文件
   "exclude": ["node_modules", "dist"]          // 排除的文件
 }
