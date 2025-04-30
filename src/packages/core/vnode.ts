@@ -14,7 +14,8 @@ export interface VNode {
 export const isVNode = (val: any): val is VNode => val?.__v_isVNode;
 export const isSameVNode = (n1: VNode, n2: VNode) => n1.type === n2.type && n1.key === n2.key;
 
-export function createVNode(type: any, props: any, children?: any): VNode {
+export function createVNode(type: any, props: any, ...children: any): VNode {
+  const normalizedChildren = children.length === 0 ? children[0] : children;
   const shapeFlag = isString(type)
     ? ShapeFlag.ELEMENT
     : isObject(type)
@@ -27,7 +28,7 @@ export function createVNode(type: any, props: any, children?: any): VNode {
     __v_isVNode: true,
     type,
     props,
-    children,
+    children: normalizedChildren,
     key: props?.key,
     el: null,
     shapeFlag

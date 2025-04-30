@@ -20,12 +20,14 @@ export function createRenderer(options: RenderOptions) {
     setText: hostSetText,
   } = options;
   const normalize = (children: any) =>{
-    for(let i = 0; i < children.length; i++) {
-      if (
-        typeof children[i] === "string" ||
-        typeof children[i] === "number"
-      ) {
-        children[i] = createVNode(Text, null, String(children[i]));
+    if (Array.isArray(children)) {
+      for(let i = 0; i < children.length; i++) {
+        if (
+          typeof children[i] === "string" ||
+          typeof children[i] === "number"
+        ) {
+          children[i] = createVNode(Text, null, String(children[i]));
+        }
       }
     }
     return children;
@@ -232,8 +234,12 @@ export function createRenderer(options: RenderOptions) {
   }
   function mountChildren(children:Array<VNode | string>, container: any, anchor: any = null) {
     normalize(children);
-    for (let i = 0; i < children.length; i++) {
-      patch(null, children[i] as VNode, container, anchor);
+    if (Array.isArray(children)) {
+      for (let i = 0; i < children.length; i++) {
+        patch(null, children[i] as VNode, container, anchor);
+      }
+    } else {
+      patch(null, children, container, anchor);
     }
   }
   function unmountChildren(children: Array<VNode | string>) {

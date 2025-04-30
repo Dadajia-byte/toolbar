@@ -2,10 +2,10 @@ import "./toolbar.scss";
 
 const Toolbar = () => {
   return (
-    <div className="toolbar">
-      <div className="toolbar__item1">Item 1</div>
-      <div className="toolbar__item">Item 2</div>
-      <div className="toolbar__item">Item 3</div>
+    <div id="toolbar" class="dark">
+      <div class="toolbar-item">1</div>
+      <div class="toolbar-item">2</div>
+      <div class="toolbar-item">3</div>
     </div>
   );
 }
