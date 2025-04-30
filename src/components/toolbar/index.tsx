@@ -1,11 +1,18 @@
 import "./toolbar.scss";
+import Top from "./top";
+import Feedback from "./feedback";
+import Contact from "./contact";
+interface ToolbarOptions {
 
-const Toolbar = () => {
+}
+const Toolbar = (options?: ToolbarOptions) => {
+  console.log(options);
+  
   return (
     <div id="toolbar" class="dark">
-      <div class="toolbar-item">1</div>
-      <div class="toolbar-item">2</div>
-      <div class="toolbar-item">3</div>
+      <Feedback/>
+      <Contact/>
+      <Top/>
     </div>
   );
 }
