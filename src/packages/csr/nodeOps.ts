@@ -2,7 +2,10 @@
 
 export const nodeOps = {
   // 创建元素
-  createElement(type: string): HTMLElement {
+  createElement(type: string, ns?: string): any {
+    if (ns) {
+      return document.createElementNS(ns, type);
+    }
     return document.createElement(type);
   },
   // 创建文本节点

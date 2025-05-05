@@ -10,12 +10,20 @@ export interface VNode {
   key?: string | number; // 节点唯一标识
   subTree?: VNode; // 子节点
   component?: any; // 组件实例
+  namespace?: string; // 命名空间
 }
 export const isVNode = (val: any): val is VNode => val?.__v_isVNode;
 export const isSameVNode = (n1: VNode, n2: VNode) => n1.type === n2.type && n1.key === n2.key;
-
+/**
+ * 
+ * @param type 节点类型
+ * @param props 节点属性
+ * @param children 节点子节点 可以是字符串、数组（vn数组）、剩余参数（多个vn节点）、对象（暂不处理）
+ * @returns 
+ */
 export function createVNode(type: any, props: any, ...children: any): VNode {
-  // const normalizedChildren = children.length === 0 ? children[0] : children;
+  const normalizeChildren = children.length === 0 ? children[0] : children;
+
   const shapeFlag = isString(type)
     ? ShapeFlag.ELEMENT
     : isObject(type)
@@ -28,19 +36,20 @@ export function createVNode(type: any, props: any, ...children: any): VNode {
     __v_isVNode: true,
     type,
     props,
-    children,
+    children: normalizeChildren,
     key: props?.key,
     el: null,
-    shapeFlag
+    shapeFlag,
+    namespace: type === 'svg' ? 'http://www.w3.org/2000/svg' : undefined,
   };
   
-  if (children) {
-    if (Array.isArray(children)) {
+  if (normalizeChildren) {
+    if (Array.isArray(normalizeChildren)) {
       vnode.shapeFlag |= ShapeFlag.ARRAY_CHILDREN;
-    } else if (isObject(children)) {
+    } else if (isObject(normalizeChildren)) {
       vnode.shapeFlag |= ShapeFlag.SLOTS_CHILDREN;
     } else {
-      children = String(children);
+      vnode.children = String(normalizeChildren);
       vnode.shapeFlag |= ShapeFlag.TEXT_CHILDREN;
     }
   }

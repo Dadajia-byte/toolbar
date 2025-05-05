@@ -1,7 +1,7 @@
 import { getSequence } from "./shared";
 import { VNode, createVNode, Text, ShapeFlag, isSameVNode, Fragment } from "./vnode";
 export interface RenderOptions {
-  createElement(type: string): any;
+  createElement(type: string, namespace?: string): any;
   createText(text: string): any;
   setText(node: any, text: string): void;
   setElementText(node: any, text: string): void;
@@ -19,19 +19,13 @@ export function createRenderer(options: RenderOptions) {
     remove: hostRemove,
     setText: hostSetText,
   } = options;
-  const normalize = (children: any) =>{
-    if (Array.isArray(children)) {
-      for(let i = 0; i < children.length; i++) {
-        if (
-          typeof children[i] === "string" ||
-          typeof children[i] === "number"
-        ) {
-          children[i] = createVNode(Text, null, String(children[i]));
-        }
-      }
-    }
-    return children;
-  }
+  const normalize = (children: Array<VNode | string | number>) =>(
+    children.map((child) =>
+      typeof child === "string" || typeof child === "number"
+        ? createVNode(Text, null, String(child))
+        : child
+    )
+  )
   function render(vnode: VNode, container: any): void {
     if (vnode === null) {
       if (container._vnode) {
@@ -94,9 +88,11 @@ export function createRenderer(options: RenderOptions) {
     n2.el = subTree.el;
   }
   function mountElement(vnode: VNode, container: any, anchor: any) {
-    const { type, children, props, shapeFlag } = vnode;
+    const { type, children, props, shapeFlag, namespace } = vnode;
     // -- 1.创建真实 DOM --
-    let el = (vnode.el = hostCreateElement(type));
+    let el = (vnode.el = namespace
+      ? hostCreateElement(type, namespace)
+      : hostCreateElement(type));
     // -- 2.处理属性 --
     if (props) {
       for (const key in props) {
@@ -107,7 +103,7 @@ export function createRenderer(options: RenderOptions) {
     if (shapeFlag & ShapeFlag.TEXT_CHILDREN) {
       hostSetElementText(el, children);
     } else if (shapeFlag & ShapeFlag.ARRAY_CHILDREN) {
-      mountChildren(children, el, anchor);
+      mountChildren(children, el, anchor, namespace);
     }
     // -- 4. 挂载到容器 --
     hostInsert(el, container);
@@ -216,11 +212,11 @@ export function createRenderer(options: RenderOptions) {
       // 调整顺序倒序插入
       let increasingSeq = getSequence(newIndexToOldMapIndex);
       let j = increasingSeq.length;
-      for(let i = toBePatched; i>0; i--) {
+      for(let i = toBePatched-1; i>=0; i--) {
         let newIndex = s2 + i;
-        let anchor = c2[newIndex +1]?.el;
+        let anchor = c2[newIndex +1]?.el || null;
         const vnode = c2[newIndex];
-        if (!c2[newIndex].el) {
+        if (!vnode.el) {
           patch(null, vnode, el, anchor);
         } else {
           if (i===increasingSeq[j]) {
@@ -232,14 +228,14 @@ export function createRenderer(options: RenderOptions) {
       }
     }
   }
-  function mountChildren(children:Array<VNode | string>, container: any, anchor: any = null) {
-    normalize(children);
-    if (Array.isArray(children)) {
-      for (let i = 0; i < children.length; i++) {
-        patch(null, children[i] as VNode, container, anchor);
+  function mountChildren(children:Array<VNode | string | number>, container: any, anchor: any = null, namespace: string | undefined = undefined) {
+    const normalizeChildren = normalize(children);
+    for (let i = 0; i < normalizeChildren.length; i++) {
+      const child = normalizeChildren[i] as VNode;
+      if (namespace) {
+        child.namespace = namespace;
       }
-    } else {
-      patch(null, children, container, anchor);
+      patch(null, child, container, anchor);
     }
   }
   function unmountChildren(children: Array<VNode | string>) {
@@ -264,11 +260,19 @@ export function createRenderer(options: RenderOptions) {
   }; 
   function patchProps(el: any, oldProps: Record<string, any>, newProps: Record<string, any>) {
     for (const key in newProps) {
-      hostPatchProp(el, key, oldProps[key], newProps[key]);
+      if (key.startsWith('xlink:')) {
+        el.setAttributeNS('http://www.w3.org/1999/xlink', key, newProps[key]);
+      } else {
+        hostPatchProp(el, key, oldProps[key], newProps[key]);
+      }
     }
     for (const key in oldProps) {
       if (!(key in newProps)) {
-        hostPatchProp(el, key, oldProps[key], null);
+        if (key.startsWith('xlink:')) {
+          el.removeAttributeNS('http://www.w3.org/1999/xlink', key);
+        } else {
+          hostPatchProp(el, key, oldProps[key], null);
+        }
       }
     }
   }
@@ -277,7 +281,12 @@ export function createRenderer(options: RenderOptions) {
       hostInsert((n2.el = hostCreateText(n2.children as string)), container);
     } else {
       if (n1.children !== n2.children) {
-        hostSetText((n2.el = n1.el), n2.children as string);
+        const newEl = hostCreateText(n2.children as string);
+        hostInsert(newEl, container, n1.el);
+        hostRemove(n1.el);
+        n2.el = newEl;
+      } else {
+        n2.el = n1.el; // 如果文本内容相同，可以复用
       }
     }
   }
