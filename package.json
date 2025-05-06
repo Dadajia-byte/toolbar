@@ -1,6 +1,6 @@
 {
-  "name": "toolbar-plugin",
-  "description": "toolbar",
+  "name": "shortcut-plugin",
+  "description": "shortcut",
   "scripts": {
     "dev": "vite",
     "build": "vite build"

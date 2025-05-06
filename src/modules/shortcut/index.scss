@@ -1,0 +1,106 @@
+#shortcut.dark {
+  --shortcut-bg-color: #1f1f1f;
+  --shortcut-bg-color-hover: #00C0C0;
+  --shortcut-text-color: #999;
+  --shortcut-text-color-hover: #fff;
+}
+
+#shortcut.light {
+  --shortcut-bg-color: #fff;
+  --shortcut-bg-color-hover: #00C0C0;
+  --shortcut-text-color: #999;
+  --shortcut-text-color-hover: #fff;
+}
+
+
+#shortcut {
+  position: fixed;
+  right: 0;
+  bottom: 82px;
+  width: 36px;
+  z-index: 999;
+  color: var(--shortcut-text-color);
+  background-color: var(--shortcut-bg-color);
+  border-radius: 4px 0 0 4px;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .18);
+  text-align: center;
+  .shortcut-item {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    width: 36px;    
+    cursor: pointer;
+    color: var(--shortcut-text-color);
+    font-size: 20px;
+    transition: all .1s;
+    &:hover {
+      color: var(--shortcut-text-color-hover);
+      background-color: var(--shortcut-bg-color-hover);
+    }
+
+    &-pop {
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      bottom: auto;
+      min-width: 85px;
+      min-height: 40px;
+      padding: 0 15px;
+      color: var(--shortcut-text-color);
+      &:hover {
+        color: var(--shortcut-text-color-hover);
+      }
+      .triangle_right {
+        position: absolute;
+        right: 2px;
+        border: 7px solid transparent;
+        top: 50%;
+        transform: translateY(-50%);
+        filter: drop-shadow(3px 0 1px rgba(0, 0, 0, .1));
+        .triangle_inner {
+          position: absolute;
+          top: -6px;
+          left: -6px;
+          width: 0;
+          height: 0;
+          border: 6px solid transparent;
+          border-left-color: var(--shortcut-bg-color);
+        }
+        &:hover {
+          color: var(--shortcut-bg-color-hover);
+        }
+      }
+      .content {
+        padding: 10px 22px 10px 15px;
+        margin-bottom: 2px;
+        font-size: 14px;
+        text-align: left;
+        background-color: var(--shortcut-bg-color);
+        border-radius: 3px;
+        white-space: nowrap;
+        .link {
+          display: block;
+          line-height: 20px;
+          text-decoration: none;
+          color: var(--shortcut-text-color);
+          &:hover {
+            color: var(--shortcut-text-color-hover);
+          }
+        }
+      }
+    }
+    &-pop.hide {
+      display: none;
+    }
+    .svg-icon {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+  }
+}
+

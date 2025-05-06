@@ -1,5 +1,15 @@
 export default function patchStyle(el:any, preValue:any, nextValue:any) {
   let style = el.style;
+  if (typeof nextValue === "string") {
+    const styleObject: Record<string, string> = {};
+    nextValue.split(";").forEach((styleRule) => {
+      const [key, value] = styleRule.split(":");
+      if (key && value) {
+        styleObject[key.trim()] = value.trim();
+      }
+    });
+    nextValue = styleObject;
+  }
   for (let key in nextValue) {
     style[key] = nextValue[key]; // 新样式要全部生效
   }

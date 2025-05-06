@@ -1,0 +1,55 @@
+#feedBackModal{
+  position: fixed;
+  align-items: center;
+  justify-content: center;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, .2);
+  z-index: 1999;
+}
+#aiseeContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 800px; 
+  width: 80%;
+  max-width: 1100px;
+  min-width: 500px;
+}
+#aiseeContainer .titleWrap{
+  position: relative;
+  height:50px; 
+  padding: 0 10px; 
+  box-sizing: border-box; 
+  border-bottom: 2px solid #e0e0e0; 
+  text-align: center; 
+  line-height:50px; 
+  background-color: #fff;
+  border-radius: 20px 20px 0 0;
+}
+.iframeWrap {
+  background-color: #fafafa; 
+  padding: 0 20px 20px 20px;
+  border-radius: 0 0 20px 20px;
+}
+.hide {
+  display:none;
+}
+.show {
+  display:flex;
+}
+.navigation_controls {
+  position: absolute;
+  text-decoration: none;
+  font-size: 20px;
+  color: #111111;
+  cursor: pointer;
+}
+.navigation_controls.disabled {
+  color: #111111;
+  opacity: 0.3;
+  cursor: default;
+}

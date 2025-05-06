@@ -1,13 +1,13 @@
-import { VNode } from "./packages/core/vnode";
+import { VNode } from "./core/runtime-core/vnode";
 
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      [elemName: string]: any; // 支持任意 HTML 标签
+      [elemName: string]: any;
     }
-    interface Element extends VNode {} // TSX 返回的类型是 VNode
+    interface Element extends VNode {}
     interface ElementChildrenAttribute {
-      children: {}; // 指定 children 属性
+      children: {};
     }
   }
 }
