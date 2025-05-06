@@ -4,7 +4,8 @@ import Feedback from "./feedback";
 import Contact from "./contact";
 import { render } from "@/core/runtime-dom";
 interface ToolbarOptions {
-
+  theme?: string;
+  
 }
 export const Shortcut = (options?: ToolbarOptions) => {
   return (

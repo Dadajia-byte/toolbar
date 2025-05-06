@@ -12,11 +12,17 @@ export default defineConfig({
     jsxFragment: 'Fragment', // JSX片段
   },
   build: {
+    assetsInlineLimit: 0, // 禁用资源内联
+    cssCodeSplit: true, // 启用 CSS 代码拆分
     lib: {
       entry: './src/main.js',
-      name: 'ToolbarPlugin',
-      fileName: (format) => `toolbar-plugin.${format}.js`,
+      iframeToast: './src/modules/feedback/iframeToast/index.tsx',
+      name: 'Shortcut',
+      fileName: (format) => `[name].${format}.js`,
+      formats: ['es', 'umd'],
     },
+    name: 'Shortcut',
+    fileName: (format) => `[name].${format}.js`,
     rollupOptions: {
       // 确保将插件作为独立模块
       external: [],
@@ -25,5 +31,5 @@ export default defineConfig({
       },
     },
   },
-  sourceMap: true,
+  // sourceMap: true,
 });

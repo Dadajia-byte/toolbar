@@ -1,5 +1,3 @@
-// 节点的 DOM 操作
-
 export const nodeOps = {
   // 创建元素
   createElement(type: string, ns?: string): any {

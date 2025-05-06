@@ -1,4 +1,4 @@
-import { initShortcut, initIframeModal } from './modules';
+import { initShortcut, showIframeModal } from './modules';
 import './global';
 
-export { initShortcut, initIframeModal };
+export { initShortcut, showIframeModal };

@@ -1,9 +1,9 @@
-import { initIframeModal } from "./feedback";
+import { showIframeModal } from "./feedback";
 import { initShortcut } from "./shortcut";
 
 
 export {
-  initIframeModal,
+  showIframeModal,
   initShortcut
 }
 
