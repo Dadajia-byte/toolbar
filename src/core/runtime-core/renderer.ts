@@ -1,5 +1,6 @@
 import { getSequence } from "./shared";
 import { VNode, createVNode, Text, ShapeFlag, isSameVNode, Fragment } from "./vnode";
+import { effect, reactive } from './reactivity';
 export interface RenderOptions {
   createElement(type: string, namespace?: string): any;
   createText(text: string): any;
@@ -17,7 +18,6 @@ export function createRenderer(options: RenderOptions) {
     insert: hostInsert,
     patchProp: hostPatchProp,
     remove: hostRemove,
-    setText: hostSetText,
   } = options;
   const normalize = (children: Array<VNode | string | number>) =>(
     children.map((child) =>
@@ -71,21 +71,45 @@ export function createRenderer(options: RenderOptions) {
     const instance = (vnode.component = {
       vnode,
       subTree: null,
-      props: vnode.props || {},
-      isMounted: false
+      props: reactive(vnode.props || {}),
+      isMounted: false,
+      update: null,
     });
     const Component = vnode.type;
-    const subTree = (instance.subTree = Component(instance.props));
-    patch(null, subTree, container, anchor);
-    vnode.el = subTree.el;
-    instance.isMounted = true;
+    instance.update = effect(() => {
+      const subTree = (instance.subTree = Component(instance.props));
+      if (!instance.isMounted) {
+        patch(null, subTree, container, anchor);
+        instance.isMounted = true;
+      } else {
+        patch(instance.subTree, subTree, container);
+      }
+      vnode.el = subTree.el;
+    });
+  }
+  function hasPropsChanged(prevProps: Record<string, any>, nextProps: Record<string, any>): boolean {
+    const prevKeys = Object.keys(prevProps);
+    const nextKeys = Object.keys(nextProps);
+    if (prevKeys.length !== nextKeys.length) {
+      return true;
+    }
+    for (const key of nextKeys) {
+      if (prevProps[key] !== nextProps[key]) {
+        return true;
+      }
+    }
+    return false;
   }
   function updateComponent(n1: VNode, n2: VNode) {
     const instance = (n2.component = n1.component);
-    instance.props = n2.props || {};
-    const subTree = (instance.subTree = instance.vnode!.type(instance.props));
-    patch(n1.subTree, subTree, n1.el);
-    n2.el = subTree.el;
+  const prevProps = instance.props;
+  const nextProps = n2.props || {};
+    if (hasPropsChanged(prevProps, nextProps)) {
+      instance.props = nextProps;
+      const subTree = (instance.subTree = instance.vnode!.type(instance.props));
+      patch(n1.subTree, subTree, n1.el);
+      n2.el = subTree.el;
+    }
   }
   function mountElement(vnode: VNode, container: any, anchor: any) {
     const { type, children, props, shapeFlag, namespace } = vnode;
@@ -204,7 +228,7 @@ export function createRenderer(options: RenderOptions) {
         if (newIndex === undefined) {
           unmount(vnode);
         } else {
-          newIndexToOldMapIndex[newIndex - s2] = i + 1;
+          newIndexToOldMapIndex[newIndex - s2] = i;
           patch(vnode, c2[newIndex] as VNode, el);
         }
       }

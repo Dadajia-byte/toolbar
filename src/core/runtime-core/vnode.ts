@@ -2,15 +2,15 @@ import { isFunction, isObject, isString } from "./shared";
 export const Text = Symbol("Text");
 export const Fragment = Symbol("Fragment");
 export interface VNode {
-  type: any; // 节点类型
+  type: any;
   props?: Record<string, any>;
-  children?: any; // 子节点
-  el?: any; // 真实 DOM 元素
-  shapeFlag: number; // 节点类型标记位
-  key?: string | number; // 节点唯一标识
-  subTree?: VNode; // 子节点
-  component?: any; // 组件实例
-  namespace?: string; // 命名空间
+  children?: any;
+  el?: any;
+  shapeFlag: number;
+  key?: string | number;
+  subTree?: VNode;
+  component?: any;
+  namespace?: string;
 }
 export const isVNode = (val: any): val is VNode => val?.__v_isVNode;
 export const isSameVNode = (n1: VNode, n2: VNode) => n1.type === n2.type && n1.key === n2.key;
