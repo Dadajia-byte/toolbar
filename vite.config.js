@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   resolve: {
@@ -8,27 +9,33 @@ export default defineConfig({
     },
   },
   esbuild: {
-    jsxFactory: 'createVNode', // JSX工厂函数
-    jsxFragment: 'Fragment', // JSX片段
+    jsxFactory: 'h',
+    jsxFragment: 'Fragment',
   },
   build: {
-    assetsInlineLimit: 0, // 禁用资源内联
-    cssCodeSplit: true, // 启用 CSS 代码拆分
     lib: {
       entry: './src/main.js',
-      iframeToast: './src/modules/feedback/iframeToast/index.tsx',
-      name: 'Shortcut',
-      fileName: (format) => `[name].${format}.js`,
-      formats: ['es', 'umd'],
+      name: 'v-shortcut',
+      fileName: (format) => `v-shortcut.${format}.js`,
     },
-    name: 'Shortcut',
-    fileName: (format) => `[name].${format}.js`,
-    rollupOptions: {
-      // 确保将插件作为独立模块
-      external: [],
-      output: {
-        globals: {},
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        ecma: 2015,
+        passes: 2,
       },
+      format: {
+        comments: false,
+      },
+    },
+    rollupOptions: {
+      plugins: [
+        visualizer({
+          filename: 'dist/stats.html', // 输出的分析文件
+          open: true, // 构建完成后自动打开浏览器
+        }),
+      ],
     },
   },
   // sourceMap: true,

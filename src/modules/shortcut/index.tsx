@@ -2,7 +2,7 @@ import "./index.scss";
 import Top from "./top";
 import Feedback from "./feedback";
 import Contact from "./contact";
-import { render } from "@/core/runtime-dom";
+import { render } from "preact";
 interface ToolbarOptions {
   theme?: string;
   

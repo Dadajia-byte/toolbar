@@ -6,8 +6,12 @@
     "build": "vite build"
   },
   "devDependencies": {
+    "rollup-plugin-visualizer": "^5.14.0",
     "sass": "^1.86.0",
     "typescript": "^5.8.2",
     "vite": "^6.3.3"
+  },
+  "dependencies": {
+    "preact": "^10.26.6"
   }
 }

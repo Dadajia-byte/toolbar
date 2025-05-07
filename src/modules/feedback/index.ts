@@ -1,5 +1,5 @@
 
-import { render } from '@/core/runtime-dom';
+import { render } from 'preact';
 import IframeModal from './IframeToast';
 
 export function showIframeModal() {
