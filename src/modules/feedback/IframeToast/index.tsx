@@ -1,5 +1,5 @@
 import './index.scss';
-import Navigation from '../logic/navigation';
+import Navigation from '../utils/navigation';
 const IframeModal = () =>{
 	const navigation = new Navigation();
 	const close = () => {

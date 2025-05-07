@@ -1,7 +1,9 @@
 
 import { render } from 'preact';
 import IframeModal from './IframeToast';
+import { getAiSeeEncryptedQuery } from './feature/service';
 
+getAiSeeEncryptedQuery();
 export function showIframeModal() {
   const container = document.querySelector('#iframeToast');
   if (!container) {

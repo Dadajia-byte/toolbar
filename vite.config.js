@@ -18,17 +18,6 @@ export default defineConfig({
       name: 'v-shortcut',
       fileName: (format) => `v-shortcut.${format}.js`,
     },
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        ecma: 2015,
-        passes: 2,
-      },
-      format: {
-        comments: false,
-      },
-    },
     rollupOptions: {
       plugins: [
         visualizer({
